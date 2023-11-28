@@ -1,21 +1,20 @@
 import type { SitemapFunction } from "remix-sitemap";
-import { Link, useLoaderData } from "@remix-run/react";
 import { MetaFunction, json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import { COMMIT, MODE } from "~/status.server";
-import { SafePing } from "~/pdf/interface.server";
+import { SafePing, api, worker } from "~/pdf/interface.server";
 
 export const sitemap: SitemapFunction = async () => ({
 	exclude: true
 })
 
 export const meta: MetaFunction = () => [
-	{ title: "Signplanet Status" },
-	{ name: "robots", content: "noindex, noarchive" }
+	{ title: "Status" }
 ];
 
 export async function loader() {
-	console.log(SafePing, __pdfWorker__, __pdfWorkerApi__);
+	console.log(SafePing, api, worker);
 
 	return json({
 		commit: COMMIT,
@@ -30,7 +29,7 @@ export async function loader() {
 export default function Render() {
 	const data = useLoaderData<typeof loader>();
 
-	return <div className="wrapper content-box">
+	return <div>
 		<h1>Status</h1>
 
 		<div style={{

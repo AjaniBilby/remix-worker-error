@@ -20,6 +20,9 @@ export default function Index() {
 		<p>
 			Look over here, a wild <Link to="/pdf" target="_blank">PDF</Link> rendered in a worker thread!!!
 		</p>
+		<p>
+			<Link to="/status">Status</Link>
+		</p>
 		<p>{now}</p>
 	</>
 }

@@ -1,22 +1,24 @@
 import nodeEndpoint from "comlink/dist/umd/node-adapter";
 import { Worker } from 'node:worker_threads';
-import { Remote, wrap } from "comlink";
+import { wrap } from "comlink";
 
+import { singleton } from "~/utils/singleton.server";
 import type { WorkerType } from "./worker";
-
-declare global {
-	var __pdfWorker__: Worker;
-	var __pdfWorkerApi__: Remote<WorkerType>;
-}
 
 
 console.log('Running Worker Setup');
-if (!global.__pdfWorker__) {
-	global.__pdfWorker__ = new Worker("./build/worker.js");
-	global.__pdfWorkerApi__ = wrap<WorkerType>(nodeEndpoint(global.__pdfWorker__));
-}
 
-const api = global.__pdfWorkerApi__;
+
+// hard-code a unique key so we can look up the client when this module gets re-imported
+export const worker = singleton(
+	"pdfWorker",
+	() => new Worker("./build/worker.js")
+);
+export const api = singleton(
+	"pdfWorkerApi",
+	() => wrap<WorkerType>(nodeEndpoint(worker))
+);
+
 export const RenderExample = api.RenderExample;
 
 export function SafePing(): Promise<"OK"| "CORRUPT" | "TIMEOUT"> {
@@ -49,7 +51,3 @@ async function VerifyStartUp() {
 	}
 }
 VerifyStartUp();
-
-setInterval(()=>{
-	console.log('status check', global.__pdfWorker__);
-}, 1000)
