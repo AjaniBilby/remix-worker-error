@@ -15,7 +15,10 @@ export default function Index() {
 		<h1>I'm a server :D</h1>
 		<p>{now}</p>
 		<p>
-			Look over here, a wild <Link to="/pdf">PDF</Link>!!!
+			Look over here, a wild <Link to="/pdf" target="_blank">PDF</Link>!!!
+		</p>
+		<p>
+			Check server <Link to="/status">status</Link>
 		</p>
 	</>
 }
