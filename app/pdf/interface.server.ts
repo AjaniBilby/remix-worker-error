@@ -10,8 +10,7 @@ declare global {
 }
 
 
-
-console.log(14, global.__pdfWorker__);
+console.log('Running Worker Setup');
 if (!global.__pdfWorker__) {
 	global.__pdfWorker__ = new Worker("./build/worker.js");
 	global.__pdfWorkerApi__ = wrap<WorkerType>(nodeEndpoint(global.__pdfWorker__));
@@ -50,3 +49,7 @@ async function VerifyStartUp() {
 	}
 }
 VerifyStartUp();
+
+setInterval(()=>{
+	console.log('status check', global.__pdfWorker__);
+}, 1000)
