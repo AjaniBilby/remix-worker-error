@@ -13,12 +13,13 @@ export default function Index() {
 
 	return <>
 		<h1>I'm a server :D</h1>
+		<p>
+			This is a mostly static page to ensure the validity of the server without interacting with any worker threads,
+			please look at the status page <Link to="/status">here</Link> to see if the server implodes the moment you touch one.
+		</p>
+		<p>
+			Look over here, a wild <Link to="/pdf" target="_blank">PDF</Link> rendered in a worker thread!!!
+		</p>
 		<p>{now}</p>
-		<p>
-			Look over here, a wild <Link to="/pdf" target="_blank">PDF</Link>!!!
-		</p>
-		<p>
-			Check server <Link to="/status">status</Link>
-		</p>
 	</>
 }
