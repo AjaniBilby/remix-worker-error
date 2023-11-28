@@ -3,7 +3,7 @@ import { MetaFunction, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import { COMMIT, MODE } from "~/status.server";
-import { SafePing, api, worker } from "~/pdf/interface.server";
+import { SafePing } from "~/pdf/interface.server";
 
 export const sitemap: SitemapFunction = async () => ({
 	exclude: true
@@ -14,7 +14,7 @@ export const meta: MetaFunction = () => [
 ];
 
 export async function loader() {
-	console.log(SafePing, api, worker);
+	// console.log(SafePing);
 
 	return json({
 		commit: COMMIT,
