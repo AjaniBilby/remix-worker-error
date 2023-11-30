@@ -1,6 +1,6 @@
 import nodeEndpoint from "comlink/dist/umd/node-adapter";
 import { Worker } from 'node:worker_threads';
-import { wrap } from "comlink";
+import { Remote, wrap } from "comlink";
 
 import { DemolishSingleton, OptionalSingleton, singleton } from "~/utils/singleton.server";
 import type { WorkerType } from "./worker";
@@ -11,16 +11,14 @@ console.log('Running Worker Setup');
 let expiry: NodeJS.Timeout | null = null;
 function GetAPI () {
 	ResetExpiry();
-	const worker = singleton(
-		"pdfWorker",
+	const worker = singleton("pdfWorker",
 		() => {
 			console.log("spawning worker");
 			const w = new Worker("./build/worker.js");
 			return w;
 		}
 	);
-	return singleton(
-		"pdfWorkerApi",
+	return singleton("pdfWorkerApi",
 		() => wrap<WorkerType>(nodeEndpoint(worker))
 	);
 }
@@ -41,16 +39,23 @@ function ExpireWorker() {
 	worker.terminate();
 }
 
+
+// function WorkerProxy<F extends keyof WorkerType>(methodName: F): (...args: Parameters<WorkerType[F]>) => Remote<WorkerType[F]> {
+// 	return function () {
+// 		return GetAPI()[methodName].prototype.apply(arguments);
+// 	} as any;
+// }
+
+
 export function RenderExample() {
 	const api = GetAPI();
-
 	return api.RenderExample();
 }
 
-export function SafePing(): Promise<"OK"| "CORRUPT" | "TIMEOUT"> {
-	const api = GetAPI();
 
+export function SafePing(): Promise<"OK"| "CORRUPT" | "TIMEOUT"> {
 	return new Promise((res, rej) => {
+		const api = GetAPI();
 		let returned = false;
 
 		setTimeout(() => {
