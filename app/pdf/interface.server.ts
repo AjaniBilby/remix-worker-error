@@ -1,9 +1,5 @@
-import nodeEndpoint from "comlink/dist/umd/node-adapter";
 import { Worker } from 'node:worker_threads';
-import { wrap } from "comlink";
-
 import { singleton } from "~/utils/singleton.server";
-import type { WorkerType } from "./worker";
 
 
 console.log('Running Worker Setup');
@@ -14,30 +10,35 @@ export const worker = singleton(
 	"pdfWorker",
 	() => new Worker("./build/worker.js")
 );
-export const api = singleton(
-	"pdfWorkerApi",
-	() => wrap<WorkerType>(nodeEndpoint(worker))
-);
 
-export const RenderExample = api.RenderExample;
+type status = "OK"| "CORRUPT" | "TIMEOUT";
+const queue: Array<(v: status) => void> = [];
 
-export function SafePing(): Promise<"OK"| "CORRUPT" | "TIMEOUT"> {
-	return new Promise((res, rej) => {
-		let returned = false;
+worker.addListener("message", () => {
+	const res = queue.pop();
+	if (!res) return;
+
+	res("OK");
+});
+
+for (const event of ["error", "exit", "message", "messageerror", "online"]) {
+	worker.on(event, (e) => {
+		console.log(`\x1b[32m[worker-client]\x1b[0m \x1b[36m${event}\x1b[0m ${e}`)
+	});
+}
+
+export function SafePing(): Promise<status> {
+	return new Promise<status>(res => {
+		worker.postMessage("ping");
+		queue.push(res);
 
 		setTimeout(() => {
-			if (returned) return;
-			returned = true;
-			res("TIMEOUT");
+			const i = queue.indexOf(res);
+			if (i !== -1) {
+				queue.splice(i, 1);
+				res("TIMEOUT");
+			}
 		}, 500);
-
-		api.Ping().then((v) => {
-			returned = true;
-			res(v == "pong"
-				? "OK"
-				: "CORRUPT"
-			);
-		}).catch(rej);
 	});
 }
 
@@ -51,3 +52,12 @@ async function VerifyStartUp() {
 	}
 }
 VerifyStartUp();
+
+const keepAlive = setInterval(()=> {
+	if (worker.threadId == -1) {
+		console.log('worker has no thread, assumed dead');
+		clearInterval(keepAlive);
+	} else {
+		console.log(`worker alive on thread:`, worker.threadId);
+	}
+}, 2000);

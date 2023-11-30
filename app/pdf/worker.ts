@@ -1,24 +1,18 @@
 
-import nodeEndpoint from "comlink/dist/umd/node-adapter";
 import { parentPort } from "worker_threads";
-import { expose } from 'comlink';
-
-import { RenderExample } from './render/example';
 
 if (!parentPort) throw new Error('InvalidWorker');
 
-export type WorkerType = {
-	RenderExample: typeof RenderExample,
-	Ping: typeof Ping,
-};
-
-function Ping() {
-	return "pong";
-}
-
-expose({
-	RenderExample,
-	Ping
-}, nodeEndpoint(parentPort));
+parentPort.addListener("message", () => {
+	parentPort?.postMessage("pong");
+});
 
 console.info('PDF Worker initialized');
+
+
+process.on('SIGTERM', () => {
+	console.log(`\x1b[32m[worker-client]\x1b[0m \x1b[36mSIGTERM\x1b[0m`);
+});
+process.on('SIGHUP', () => {
+	console.log(`\x1b[32m[worker-client]\x1b[0m \x1b[36mSIGHUP\x1b[0m`);
+});
