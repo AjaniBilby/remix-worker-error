@@ -61,3 +61,16 @@ const keepAlive = setInterval(()=> {
 		console.log(`worker alive on thread:`, worker.threadId);
 	}
 }, 2000);
+
+
+// Uncomment this and the server explodes
+// process.on('uncaughtException', (error) => {
+// 	console.log(`\x1b[95m[main-client]\x1b[0m \x1b[36mUncaught Exception\x1b[0m`, error);
+// });
+
+// process.on('unhandledRejection', (reason, promise) => {
+// 	console.log(
+// 		`\x1b[95m[main-client]\x1b[0m \x1b[36mUnhandled Rejection\x1b[0m\n`
+// 		+ promise
+// 		+ '\nreason: ' + reason);
+// });
